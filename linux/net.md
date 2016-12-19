@@ -167,9 +167,79 @@ MAC 地址是48位
 不配置网关，不配置 DNS 不能访问公网，只能访问局域网
 在一台服务器里，连内网的网卡是不能设置网关的
 
-==================================
 
-==================================
+#### Linux 网络配置 #####
+
+1- Linux 配置 IP 地址
+DHCP服务器 ： 自动分配 IP 地址的服务器
+#service network restart // 重启网络
+
+1-1 ifconfig [临时配置 IP 地址]
+*作用： 查看和配置网络状态
+
+#ifconfig // 查看网卡信息
+网卡：lo(代表当前计算机自己)，eth0(第一块网卡)
+
+#ifconfig eth0 192.168.1.123 netmask 255.255.255.0 // 临时配置 eth0 网卡的 IP 地址和子网掩码
+
+1-2 setup [永久配置IP地址]
+红帽专有的图形化工具
+#setup
+
+2- Linux 网络配置文件
+修改配置文件
+网卡信息文件
+# vi /etc/sysconfig/network-scripts/ifcfg-eth0 // eth0 代表第一块网卡
+-----------------------------------------------------------------------------------------
+DEVICE=eth0   				// 网卡设备名
+BOOTPROTO=none				// 是否自动获取IP(none,static,dhcp)
+HWADDR=00:0c:29:17:c4:09 	// MAC 地址
+ONBOOT=yes 					// 是否随网络服务启动，设置为yes,eth0 生效
+TYPWE=Ethernet 				// 类型为以太网
+USERCTL=no 					// 不允许非 root 用户控制此网卡
+--> 下面的如果BOOTPROTO=dhcp,则会自动生成
+NM_CONTROLLED=yes			// 是否可以由Network Manager 图形管理工具托管，没有图形桌面填 no
+UUID="xxx" 					// 唯一识别码
+IPADDR=192.168.0.1			// IP 地址
+NETMASK=255.255.255.0 		// 子网掩码
+GATEWAY=192.168.0.1 		// 网关
+DNS1=202.106.0.20 			// DNS
+IPV6INIT=no 				// IPv6 没有启用
+-----------------------------------------------------------------------------------------
+
+主机名文件
+# vi /etc/sysconfig/network
+-----------------------------------------------------------------------------------------
+NETWORKING=yes					// 网络服务是否开启
+HOSTNAME=localhost.localdomain  // 主机名，改完后重启计算机
+-----------------------------------------------------------------------------------------
+# hostname wahhung // 临时更改主机名
+# hostname // 查看主机名
+
+DNS 配置文件
+# vi /ect/resolv.conf
+-----------------------------------------------------------------------------------------
+nameserver 202.106.0.20 // DNS，名称服务器,多个可以空格分开，或者再写一行 nameserver
+search localhost // 如果输入域名不全，会尝试拼接 xxx.localhost
+-----------------------------------------------------------------------------------------
+
+3- 虚拟机网络参数配置
+a、修改Linux IP 地址
+
+b、启动网卡
+	# vi /etc/sysconfig/network-scripts/ifcfg-eth0
+	ONBOOT=yes 
+	# service network restart	//重启网络服务
+
+c、修改 UUID [通过镜像复制过来的UUID会重复、冲突]
+	# vi /ect/sysconfig/network-scripts/ifcfg-eth0
+	# 删除 MAC 地址行
+	# rm -rf /etc/udev/rules.d/70-persistent-net.rules
+	# 删除网卡和 MAC 地址 绑定
+	# 重启系统
+d、
+	桥接：虚拟机和真实机进行通信，使用的是真实的网卡
+	
 ### linux 网络环境查看命令 ###
 关闭和启动网卡
 #ifdown 网卡设备名 // 禁用该网卡设备
