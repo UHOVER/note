@@ -32,6 +32,13 @@ Hosts->Hub->交换机
 
 CAM 表：初始是空的，并且300秒刷新
 
-### 
+####################################################################
+### 应用层
+File Transfer(文件传输): TFTP、FTP、NFS
+E-Mail: SMTP
+Remote Login(远程登录):Telnet、rlogin
+Network Management(网络): SNMP
+Name Management(名称管理协议):DNS
 
+### 传输层
 
