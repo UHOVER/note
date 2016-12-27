@@ -1,171 +1,1 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-end
+### socket 的概念具体结构如 TCP/IP&Socket.png 展示```用户进程：应用层的操作，工作在用户空间内核：TCP/IP 协议栈 除了应用层，都属于内核的一部分socket(套接口)：用户进程与内核网络协议栈的编程接口。用于进程间通信，(属于全双工通信)，可以用于网络上不同的主机进程间通信。[不去关心底层传输的细节]异构系统通信：软件平台不一样，硬件也不一样。```网络字节序```大端字节序：最高有效位存储于最低内存地址，最低有效位存储于最高内存地址小端字节序：最高有效位存储于最高内存地址，最低有效位存储于最低内存地址主机字节序：不同的主机有不同的字节序。可能为 大端字节序 也可能为 大端字节序网络字节序：规定为 大端字节序HostA->[主机字节序转换为网络字节序]->[网络传输]->[网络字节序转换为主机字节序]->HostB```字节序转换函数```uint32_t htonl(uint32_t hostlong); // htonl h(主机字节序) to(转换为) n(网络字节序) l(long)uint16_t htons(uint16_t hostshort);uint32_t ntohl(uint32_t netlong); // ntohl n(网络字节序) to(转换为) h(主机字节序) l(long)uint16_t ntohs(uint16_t netshort);说明：    h 代表 host    n 代表 network    s 代表 short    l 代表 long   ```地址转换函数```#include <netinet/in.h>#include <arpa/inet.h>int inet_aton(const char *cp, struct in_add *inp); // 将点分十进制IP转换成网络字节序地址，和 inet_addr 一样，参数不同in_addr_t inet_addr(const char *cp); // 将点分十进制IP转换为32位整数char *inet_ntoa(struct in_addr in); // 将地址结构转换为点分十进制的IP地址```套接字类型```流式套接字(SOCK_STREAM): // TCP    面向连接、可靠数据传输、数据无差错、无重复发送、按发送顺序接收数据报式套接字(SOCK_DGRAM):    无连接服务、不提供无错保证、数据可能丢失或重复、接收顺序混乱原始套接字(SOCK_RAW):    跨越传输层，直接对IP层进行封装的套接字    通过 原始套接字 可以将应用层数据直接封装成 IP 层可认识的协议格式```TCP客户端服务器模型.png回射客户端服务器.pngsocket函数```包含头文件 <sys/socket.h>功能：创建一个套接字用于通信原型：    int socket(int domain, int type, int protocol);参数：    domain：指定通信协议族(protocol family)    type:指定 socket 类型    protocol:协议类型返回值:非负整数，套接字，失败返回 -1```end
