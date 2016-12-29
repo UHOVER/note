@@ -61,7 +61,7 @@ type TCPAddr struct{
     IP IP
     Port int
 }
-// net:"ip","ip4" 或者 "ip6" addr: 主机名/IP地址:port(端口)
+//获取TCPAddr(ip+port) net:"ip","ip4" 或者 "ip6" addr: 主机名/IP地址:port(端口)
 func ResolveTCPAddr(net,addr string)(*TCPAddr, os.Error)
 ```
 
@@ -75,6 +75,9 @@ func (c *TCPConn) Read(b []byte)(n int, err os.Error)
 //laddr:本地地址，通常设置为nil; raddr:是一个服务的远程地址;net:字符串,"ip","ip4","ip6"
 func DialTCP(net string, laddr, raddr *TCPAddr)(c *TCPConn, err os.Error)
 
+在一个服务器上注册并监听一个端口，然后它阻塞在一个 "accept" 操作。并等待客户端连接。
+当一个客户端连接，accept 调用返回一个连接(connection)对象。
+// 如果想监听所有网络，IP地址应设置为 0，只是想监听一个简单网络接口，IP地址可以设置为该网络的地址。如果端口设置为0，O/S会选择一个端口。
 func ListenTCP(net string, laddr *TCPAddr) (l *TCPListener, err os.Error)
 func (l *TCPListener) Accept() (c Conn, err os.Error)
 ```

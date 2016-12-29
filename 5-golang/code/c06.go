@@ -1,6 +1,6 @@
 /**
-* 一个时间服务器
-* ./c06 $telnet localhost 1200
+* 回射服务器 + 多线程 = 多线程回射服务器
+* EchoServer + Thread = ThreadedEchoServer
  */
 
 package main
@@ -9,11 +9,10 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"time"
 )
 
 func main() {
-	service := ":1200"
+	service := ":1201"
 	// 获取 ip+port
 	tcpAddr, err := net.ResolveTCPAddr("tcp4", service)
 	checkError(err)
@@ -27,10 +26,24 @@ func main() {
 			continue
 		}
 
-		daytime := time.Now().String()
-		fmt.Println(daytime)
-		conn.Write([]byte(daytime))
+		go handleClient(conn)
 		conn.Close()
+	}
+}
+
+func handleClient(conn net.Conn) {
+	defer conn.Close()
+	var buf [512]byte
+	for {
+		n, err := conn.Read(buf[0:])
+		if err != nil {
+			return
+		}
+		fmt.Println(string(buf[0:]))
+		_, err2 := conn.Write(buf[0:n])
+		if err2 != nil {
+			return
+		}
 	}
 }
 
