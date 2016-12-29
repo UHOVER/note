@@ -39,15 +39,45 @@ IP 掩码
 type IPMask []byte
 // 用一个4字节的IPv4地址来创建一个掩码
 func IPv4Mask(a, b, c, d byte) IPMask
-// 一个IP的方法返回默认的掩码,一个掩码的字符串形式是一个十六进制数，如掩码255.255.0.0为ffff0000
+// 一个IP的方法返回默认的子网掩码,一个掩码的字符串形式是一个十六进制数，如掩码255.255.0.0为ffff0000
 func (ip IP) DefaultMask() IPMask
-// 一个掩码可以使用一个IP地址的方法，找到该IP地址的网络
+// 一个掩码可以使用一个IP地址的方法，找到该IP地址的网络(网络地址)
 func (ip IP) Mask(mask IPMask) IP
 
+IPAddr 类型
+type IPAddr{
+    IP IP
+}
+// 通过IP主机名(域名)，执行NDS 查找，返回IP地址
+// 参数：net: "ip","ip4" 或者 "ip6"
+func ResolveIPAddr(net,addr string)(*IPAddr, os.Error)
+// 通过域名查找多种IP地址，IPv6,IPv4 ,返回数组
+func LookupHost(host string) (addrs []string, err error)
+// 通过传输协议(TCP/UDP/SCTP) 和 服务类型(ftp/ssh) 获得其对应的端口号
+func LookupPort(network, service string) (port int, err os.Error)
 
-
+TCPAddr 类型
+type TCPAddr struct{
+    IP IP
+    Port int
+}
+// net:"ip","ip4" 或者 "ip6" addr: 主机名/IP地址:port(端口)
+func ResolveTCPAddr(net,addr string)(*TCPAddr, os.Error)
 ```
 
+TCP 套接字
+```
+net.TCPConn 是允许在客户端和服务器之间的全双工通信的GO类型
+// TCPConn 被客户端和服务器用来读写消息
+func (c *TCPConn) Write(b []byte)(n int, err os.Error)
+func (c *TCPConn) Read(b []byte)(n int, err os.Error)
+//客户端建立TCP连接，返回用于通信的TCPConn
+//laddr:本地地址，通常设置为nil; raddr:是一个服务的远程地址;net:字符串,"ip","ip4","ip6"
+func DialTCP(net string, laddr, raddr *TCPAddr)(c *TCPConn, err os.Error)
+
+func ListenTCP(net string, laddr *TCPAddr) (l *TCPListener, err os.Error)
+func (l *TCPListener) Accept() (c Conn, err os.Error)
+```
 
 
 

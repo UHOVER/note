@@ -1,5 +1,6 @@
 /**
-* 将
+* 通过 输入一个 IP 判断是否位合法的IP地址
+* 查找该IP地址的子网掩码和网络地址
 * ./c01 127.0.0.1
  */
 
@@ -14,10 +15,6 @@ import (
 func main() {
 	// os.Args 获取命令行参数 os.Args[0] 为执行的程序 os.Args[1] 第一个参数
 	// 例如 $./c01 127.0.0.1 os.Args[0]=./c01 os.Args[1]=127.0.0.1
-	for i := 0; i < len(os.Args); i++ {
-		fmt.Println(os.Args[i])
-	}
-
 	if len(os.Args) != 2 {
 		fmt.Fprintf(os.Stderr, "Usage: %s ip-addr\n", os.Args[0])
 		os.Exit(1)
@@ -32,7 +29,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	// 返回默认的掩码
+	// 返回默认的子网掩码
 	mask := addr.DefaultMask()
 	// 一个掩码可以使用一个IPhone地址的方法，找到该IP地址的网络
 	network := addr.Mask(mask)
