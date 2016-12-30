@@ -16,6 +16,7 @@ func main() {
 	// 获取 ip+port
 	tcpAddr, err := net.ResolveTCPAddr("tcp4", service)
 	checkError(err)
+	fmt.Println("服务器IP地址:", tcpAddr.IP.String())
 
 	listener, err := net.ListenTCP("tcp", tcpAddr)
 	checkError(err)
@@ -39,7 +40,7 @@ func handleClient(conn net.Conn) {
 		if err != nil {
 			return
 		}
-		fmt.Println(string(buf[0:]))
+		fmt.Println("SERVER:", string(buf[0:]))
 		_, err2 := conn.Write(buf[0:n])
 		if err2 != nil {
 			return

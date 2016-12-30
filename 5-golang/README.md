@@ -80,9 +80,21 @@ func DialTCP(net string, laddr, raddr *TCPAddr)(c *TCPConn, err os.Error)
 // 如果想监听所有网络，IP地址应设置为 0，只是想监听一个简单网络接口，IP地址可以设置为该网络的地址。如果端口设置为0，O/S会选择一个端口。
 func ListenTCP(net string, laddr *TCPAddr) (l *TCPListener, err os.Error)
 func (l *TCPListener) Accept() (c Conn, err os.Error)
+
+//超时(在套接字读写前)
+func (c *TCPConn) SetTimeout(nsec int64) os.Error
+//存活状态
+func (c *TCPConn) SetKeepAlive(keepalive bool) os.Error
 ```
 
-
+UDP
+```
+func ResolveUDPAddr(net, addr string) (*UDPAddr, os.Error)
+func DialUDP(net string, laddr, raddr *UDPAddr) (c *UDPConn, err os.Error)
+func ListenUDP(net string, laddr *UDPAddr) (c *UDPConn, err os.Error)
+func (c *UDPConn) ReadFromUDP(b []byte) (n int, addr *UDPAddr, err os.Error
+func (c *UDPConn) WriteToUDP(b []byte, addr *UDPAddr) (n int, err os.Error)
+```
 
 
 
