@@ -96,6 +96,33 @@ func (c *UDPConn) ReadFromUDP(b []byte) (n int, addr *UDPAddr, err os.Error
 func (c *UDPConn) WriteToUDP(b []byte, addr *UDPAddr) (n int, err os.Error)
 ```
 
+Conn,PacketConn 和 Listener 类型
+```
+//net可以是"tcp", "tcp4" (IPv4-only), "tcp6" (IPv6-only), "udp", "udp4" (IPv4-only), "udp6" (IPv6-only), "ip", "ip4" (IPv4-only)和"ip6" (IPv6-only)任何一种。它将返回一个实现了Conn接口的类型。注意此函数接受一个字符串而不是raddr地址参数，因此，使用此程序可避免的地址类型。
+func Dial(net,laddr,raddr string)(c Conn,err os.Error)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
