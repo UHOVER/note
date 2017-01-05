@@ -100,11 +100,20 @@ Conn,PacketConn 和 Listener 类型
 ```
 //net可以是"tcp", "tcp4" (IPv4-only), "tcp6" (IPv6-only), "udp", "udp4" (IPv4-only), "udp6" (IPv6-only), "ip", "ip4" (IPv4-only)和"ip6" (IPv6-only)任何一种。它将返回一个实现了Conn接口的类型。注意此函数接受一个字符串而不是raddr地址参数，因此，使用此程序可避免的地址类型。
 func Dial(net,laddr,raddr string)(c Conn,err os.Error)
+func Listen(net, laddr string) (l Listener, err os.Error)
+func (l Listener) Accept() (c Conn, err os.Error)
+
 ```
 
 
+### 数据序列化
+```
+IP，TCP或者UDP网络包并不知道编程语言的数据类型的含义，它们只是字节序列的载体。因此，写入网络包的时候，应用需要将要传输的(有类型的)数据 序列化 成字节流，反之，读取网络包的时候，应用需要将字节流反序列化成合适的数据结构，这两个操作被分别称为编组和解组。
+func Marshal(var interface{})([]byte, os.Error)
+func Unmarshal(var interface{}, b []byte)(rest []byte, err os.Error)
 
-
+Go内部实际是使用reflect包来编、解组结构，因此reflect包必须能访问所有的字段。
+```
 
 
 

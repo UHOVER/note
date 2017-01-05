@@ -14,11 +14,14 @@ import (
 func main() {
 	service := ":1201"
 	// 获取 ip+port
-	tcpAddr, err := net.ResolveTCPAddr("tcp4", service)
-	checkError(err)
-	fmt.Println("服务器IP地址:", tcpAddr.IP.String())
+	// tcpAddr, err := net.ResolveTCPAddr("tcp4", service)
+	// checkError(err)
+	// fmt.Println("服务器IP地址:", tcpAddr.IP.String())
 
-	listener, err := net.ListenTCP("tcp", tcpAddr)
+	// listener, err := net.ListenTCP("tcp", tcpAddr)
+	// checkError(err)
+
+	listener, err := net.Listen("tcp", service)
 	checkError(err)
 
 	for {
