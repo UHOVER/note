@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	service := ":1201"
+	service := ":8090"
 	// 获取 ip+port
 	// tcpAddr, err := net.ResolveTCPAddr("tcp4", service)
 	// checkError(err)
@@ -39,15 +39,15 @@ func handleClient(conn net.Conn) {
 	defer conn.Close()
 	var buf [512]byte
 	for {
-		n, err := conn.Read(buf[0:])
+		_, err := conn.Read(buf[0:])
 		if err != nil {
 			return
 		}
 		fmt.Println("SERVER:", string(buf[0:]))
-		_, err2 := conn.Write(buf[0:n])
-		if err2 != nil {
-			return
-		}
+		// _, err2 := conn.Write(buf[0:n])
+		// if err2 != nil {
+		// 	return
+		// }
 	}
 }
 

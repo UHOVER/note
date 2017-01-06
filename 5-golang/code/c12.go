@@ -1,5 +1,6 @@
 /**
 * ASN1 DaytimeServer
+* c13.go
 **/
 
 package main
@@ -13,7 +14,7 @@ import (
 )
 
 func main() {
-	service := ":1201"
+	service := ":8090"
 	tcpAddr, err := net.ResolveTCPAddr("tcp", service)
 	checkError(err)
 
@@ -32,7 +33,6 @@ func main() {
 		conn.Write(mdata)
 		conn.Close()
 	}
-
 }
 
 func checkError(err error) {

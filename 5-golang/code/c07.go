@@ -13,12 +13,13 @@ import (
 )
 
 func main() {
-	service := ":1201"
-	tcpAddr, err := net.ResolveTCPAddr("tcp4", service)
-	checkError(err)
-	fmt.Println("服务器IP地址:", tcpAddr.IP.String())
+	if len(os.Args) != 2 {
+		fmt.Fprintf(os.Stderr, "Usage : %s host:port", os.Args[0])
+		os.Exit(1)
+	}
+	service := os.Args[1]
 
-	conn, err := net.DialTCP("tcp", nil, tcpAddr)
+	conn, err := net.Dial("tcp", service)
 	checkError(err)
 
 	_, err = conn.Write([]byte("HELLOWORLD"))

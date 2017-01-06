@@ -1,5 +1,6 @@
 /**
 * ASN1 DaytimeClient
+* go run c13.go ip:port
 **/
 
 package main
