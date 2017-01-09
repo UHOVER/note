@@ -1,63 +1,117 @@
 /**
-* ASN1 DaytimeClient
-* go run c13.go ip:port
+* save gob
+* 将 gob 序列化后的数据存入文件中
 **/
 
 package main
 
 import (
-	"bytes"
-	"encoding/asn1"
+	"encoding/gob"
 	"fmt"
-	"io"
-	"net"
 	"os"
-	"time"
 )
 
-func main() {
-	if len(os.Args) != 2 {
-		fmt.Fprintf(os.Stderr, "Usage : %s host:port", os.Args[0])
-		os.Exit(1)
-	}
-	service := os.Args[1]
-
-	conn, err := net.Dial("tcp", service)
-	checkError(err)
-
-	result, err := readFully(conn)
-	checkError(err)
-
-	var newtime time.Time
-	_, err = asn1.Unmarshal(result, &newtime)
-	checkError(err)
-
-	fmt.Println("client After marshal/unmarshal:", newtime.String())
-	os.Exit(0)
+type Person struct {
+	Name  Name
+	Email []Email
 }
 
-func readFully(conn net.Conn) ([]byte, error) {
-	defer conn.Close()
+type Name struct {
+	Family   string
+	Personal string
+}
 
-	result := bytes.NewBuffer(nil)
-	var buf [512]byte
-	for {
-		n, err := conn.Read(buf[0:])
-		result.Write(buf[0:n])
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			return nil, err
-		}
-	}
+type Email struct {
+	Kind    string
+	Address string
+}
 
-	return result.Bytes(), nil
+func main() {
+	person := Person{
+		Name: Name{Family: "Newmarch", Personal: "Jan"},
+		Email: []Email{Email{Kind: "home", Address: "jan@newmarch.name"},
+			Email{Kind: "work", Address: "jan@newmarch.name"}}}
+
+	saveGob("data/preson.gob", person)
+
+}
+
+func saveGob(fileName string, key interface{}) {
+	outFile, err := os.Create(fileName)
+	checkError(err)
+
+	encoder := gob.NewEncoder(outFile)
+	err = encoder.Encode(key)
+	checkError(err)
+
+	outFile.Close()
 }
 
 func checkError(err error) {
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Fatal error: %s", err.Error())
+		fmt.Println("Fatal error", err.Error())
+		os.Exit(1)
+	}
+}
+
+/////////////////////////////////////////////////
+/**
+* load gob
+* 将 gob 文件加载到内存中
+**/
+
+package main
+
+import (
+	"encoding/gob"
+	"fmt"
+	"os"
+)
+
+type Person struct {
+	Name  Name
+	Email []Email
+}
+
+type Name struct {
+	Family   string
+	Personal string
+}
+
+type Email struct {
+	Kind    string
+	Address string
+}
+
+func (p Person) String() string {
+	s := p.Name.Personal + " " + p.Name.Family
+	for _, v := range p.Email {
+		s += "\n" + v.Kind + ": " + v.Address
+	}
+	return s
+}
+
+func main() {
+	var person Person
+	loadGob("data/person.gob", &person)
+
+	fmt.Println("Person:", person.String())
+}
+
+func loadGob(fileName string, key interface{}) {
+	inFile, err := os.Open(fileName)
+	checkError(err)
+
+	decoder := gob.NewDecoder(inFile)
+	err = decoder.Decode(key)
+	checkError(err)
+
+	inFile.Close()
+}
+
+func checkError(err error) {
+	if err != nil {
+		fmt.Println("Fatal error", err.Error())
 		os.Exit(1)
 	}
 }

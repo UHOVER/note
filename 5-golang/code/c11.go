@@ -1,5 +1,5 @@
 /**
-* ASN .1
+* ASN .1 编码解码
  */
 package main
 

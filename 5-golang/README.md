@@ -113,9 +113,22 @@ func Marshal(var interface{})([]byte, os.Error)
 func Unmarshal(var interface{}, b []byte)(rest []byte, err os.Error)
 
 Go内部实际是使用reflect包来编、解组结构，因此reflect包必须能访问所有的字段。
+
+json/gob/base64
+NewEncoder/NewDecoder
+
+gob 包
+只能编码 Go 的数据类型
+为了使用gob编组一个数据值，首先你得创建Encoder。它使用Writer作为参数，编组操作会将最终结果写入此流中。encoder有个Encode方法，它执行将值编组成流的操作。此方法可以在多份数据上被调用多次。但是对于每一种数据类型，类型信息却只会被写入一次。
+你将使用Decoder来执行解组序列化后的数据流的操作。它持有一个Reader参数，每次读取都将返回一个解组后的数据值。
 ```
 
+### 应用协议
+```
+客户端和服务器需要通过消息来进行交互。TCP和UDP是信息交互的两种传输机制。在这两种传输机制之上就需要有协议来约定传输内容的含义。协议清楚说明分布式应用的两个模块之间交互消息的消息体、消息的数据类型、编码格式等。
 
+
+```
 
 
 
