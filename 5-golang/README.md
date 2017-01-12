@@ -139,10 +139,58 @@ Blowfish和DES
 
 当前互联网上最流行的加密消息传输方案是TLS（Transport Layer Security安全传输层），其前身为SSL（Secure Sockets Layer安全套接字层）。
 在TLS中，客户端和服务器之间使用X.509证书进行身份验证。身份验证完成后，两者之间会生成一个密钥，所有的加密和解密过程都使用这个密钥。虽然客户端和服务端协商的过程相对较慢，但一旦完成就会使用一个较快的私钥机制。
+```
+
+### http
+```
+URL:指定资源的位置(资源通常为 HTML文档、图片、声音文件等静态文件和动态生成的对象，如根据数据信息生成)
+请求资源返回并不是资源本身，而是资源的代表，如静态文件的副本。
+HTTP协议是无状态，面向连接和可靠的。每次请求都包括一个独立的TCP连接。
+
+// 最简单的请求是由用户代理发起 "HEAD" 命令(http.Head func), 响应状态对应response 中的 Status 属性(response.Status)，Header 属性对应 HTTP 响应的 header 域(response.Header)
+func Head(url string) (r *Response, err os.Error)
+// GET 请求收到的是一个资源的内容(http.Get func),响应内容为response的Body属性(response.body),是一个 io.ReadCloser 类型
+func Get(url string) (r *Response, finalURL string, err os.Error)
+
+简单代理
+向代理服务器发送一个"GET"请求，但是请求URL必须是完整的目标地址。此外，设置代理的HTTP头应当包含 "Host" 字段。只要代理服务器设置为运行这样的请求通过。
+Go 把这看成 HTTP 传输层的一部分。可使用 Transport 类进行管理。假设有一个代理服务器地址字符串URL，相应的创建Transport对象并交给Client对象的代码：
+proxyURL, err := url.Parse(URL)
+transport := &http.Transport{Proxy: http.ProxyURL(proxyURL)}
+client := &http.Client{Transport: transport}
+
+有些代理服务器要求通过用户名和密码进行身份验证才能传递请求。一般的方法是“基本身份验证”：将用户名和密码串联成一个字符串“user:password”，然后进行Base64编码，然后添加到HTTP请求头的“Proxy-Authorization”中，再发送到代理服务器
+basic := "Basic " + base64.StdEncoding.EncodeToString([]byte(auth))
+...
+request.Header.Add("Proxy-Authorization", basic)
+
+HTTP = HTTP+TLS
+服务器必须在客户端接受从其数据前返回有效的X.509证书。如果证书有效，Go会在内部处理好所有的事情，而客户端会在使用HTTPS地址
+
+Go提供了一个multi-plexer，即一个读取和解释请求的对象。它把请求交给运行在自己线程中的handlers。这样，许多读取HTTP请求，解码并转移到合适功能上的工作都可以在各自的线程中进行。
+对于文件服务器，Go提供了一个FileServer对象，它知道如何发布本地文件系统中的文件。它需要一个“root”目录，该目录是在本地系统中文件树的顶端；还有一个针对URL的匹配模式。最简单的模式是“/”，这是所有URL的顶部，可以匹配所有的URL。
 
 ```
 
+### 模板
+```
+大多数服务器端语言的机制主要是在静态页面插入一个动态生成的组件，如清单列表项目。GO的template包中采取了相对简单的脚本化语言。
+源文件被称作 template ，包括文本传输方式不变，以嵌入命令可以作用于和更改文本。命令规定如 {{ ... }} ，类似于JSP命令 <%= ... =%> 和PHP命令 <?php ... ?>。
 
+type Job struct {
+    Employer string
+    Role     string
+}
+-> 模板
+{{with .Jobs}}
+    {{range .}}
+        An employer is {{.Employer}}
+        and the role is {{.Role}}
+    {{end}}
+{{end}}
+
+
+```
 
 
 
