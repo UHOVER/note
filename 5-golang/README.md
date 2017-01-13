@@ -176,7 +176,7 @@ Go提供了一个multi-plexer，即一个读取和解释请求的对象。它把
 ```
 大多数服务器端语言的机制主要是在静态页面插入一个动态生成的组件，如清单列表项目。GO的template包中采取了相对简单的脚本化语言。
 源文件被称作 template ，包括文本传输方式不变，以嵌入命令可以作用于和更改文本。命令规定如 {{ ... }} ，类似于JSP命令 <%= ... =%> 和PHP命令 <?php ... ?>。
-
+import "html/template"
 type Job struct {
     Employer string
     Role     string
