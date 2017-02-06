@@ -1,29 +1,29 @@
 # cd
-```
+```shell
 . 代表此层目录
 .. 代表上一层目录
 - 代表前一个工作目录
 ~ 代表『目前使用者身份』所在的家目录
 ```
 
-#查看文件
-```
+# 查看文件
+```shell
 查看根目录下的文件 $ ll /
 查看所有文件(包括隐藏文件) $ ll -a
 查看根目录本身的权限，不是目录底下的文件 $ll -d /
 查看某目录下含有某字符名的文件 $ll /etc/ | grep 'yum'
 ```
 
-#检查系统上的用户状态: 
-```
+# 检查系统上的用户状态: 
+```shell
 $w
 10:26:17 up  3:34,  1 user,  load average: 0.00, 0.01, 0.05
 USER(使用者)     TTY(终端 tty1~tty6,但tty1使用图形界面登入是，显示[:0])      FROM             LOGIN@   IDLE   JCPU   PCPU  WHAT(该终端目前使用什么指令)
 wahhung        pts/0   (0还是显示终端不在 tty1~tty6) 					mserver-2.lan    	06:52   1.00s  0.04s  0.01s  w
 ```
 
-#关机
-```
+# 关机
+```shell
 $poweroff
 $halt
 $shutdown -h now
@@ -32,12 +32,12 @@ $systemctl poweroff
 ```
 
 #切换root
-```
+```shell
 $su - //回车然后输入管理员密码
 ```
 
 # linux 目录树
-```
+```shell
 目录名称	应放置档案内容(一定要知道的内容)
 ------------------------------------------------------
 /bin 		/bin主要放置一般用户可操作的指令
@@ -79,20 +79,20 @@ $su - //回车然后输入管理员密码
 ```
 
 # 磁盘和目录树的搭配
-```
+```shell
 $df (display filesystem)
 ```
 
 # linux 下的 /dev 有关
-```
+```shell
 1、/dev/shm/是linux下一个非常有用的目录，因为这个目录不在硬盘上，而是在内存里。因此在linux下，就不需要大费周折去建ramdisk，直接使用/dev/shm/就可达到很好的优化效果。 /dev /shm/需要注意的一个是容量问题，在linux下，它默认最大为内存的一半大小，使用df -h命令可以看到。但它并不会真正的占用这块内存，如果/dev/shm/下没有任何文件，它占用的内存实际上就是0字节；如果它最大为1G，里头放有 100M文件，那剩余的900M仍然可为其它应用程序所使用，但它所占用的100M内存，是绝不会被系统回收重新划分的，否则谁还敢往里头存文件呢？
 默认系统就会加载/dev/shm ，它就是所谓的tmpfs，有人说跟ramdisk（虚拟磁盘），但不一样。象虚拟磁盘一样，tmpfs 可以使用您的 RAM，但它也可以使用您的交换分区来存储。而且传统的虚拟磁盘是个块设备，并需要一个 mkfs 之类的命令才能真正地使用它，tmpfs 是一个文件系统，而不是块设备；您只是安装它，它就可以使用了。
 2、/dev/null 垃圾桶。$cp -r /etc . 2> /dev/null ;2> /dev/null 来将错误的资料导向垃圾桶(/dev/null)
 ```
 
 #一些命令
-```
-$pwd [-P] #显示当前路径，-P 显示粗话真是路径，非链接(link) 路径
+```shell
+$pwd [-P] #显示当前路径，-P 显示出真是路径，非链接(link) 路径
 $mkdir [-mp] #创建目录 -m:配置权限(-m u=rwx) -p:建立多层目录	
 $rmdir [-p]  #仅能删除空目录 [-p] 删除多层
 $cp [-adfilprsu] 源文件(source) 目标文件(des) # 复制文件或目录，不加选项某些属性/权限，文件的建立时间也会改变
@@ -106,6 +106,40 @@ $cp [-adfilprsu] 源文件(source) 目标文件(des) # 复制文件或目录，�
 例如: /usr/local/bin/ls 与/bin/ls 那么当我下达 ls 时，哪个目录先被查询到，先执行
 ```
 
+# 权限
+```shell
+$ls -al 和 $ll 的区别: 前者包含隐藏文件，.xxx
+drwxrwxr-x. 3 wahhung wahhung   20 9月   5 23:12    data
+    |       |    |      |       |         |          |
+文件类型权限 链接数 拥有者 所属群组  容量bytes 最后修改时间 名称(.data 表示隐藏文件)
+
+文件类型权限
+-rwxrwx---[0123456789]
+0、文件类型:[d]目录[-]文件[l]link file[b][c]
+2-9、权限：[r]read可读[w]write可写[x]execute可执行[-]无权限
+123:拥有者权限 user
+456:同组使用者权限 group
+789:其他使用者权限 other
+
+权限修改指令
+chgrp:改变档案所属群组
+    #chgrp [-R] group dirname/filename
+    -R: recursive,可选，有 -R 则说明，该目录下的所有文件和目录都被更改群组
+    group: 群组名称，必须存在
+chown:改变档案拥有者
+    #chown [-R] user dirname/filename
+    owner: 拥有者，必须存在
+chmod:改变档案的权限
+    可以使用数字或者符号来进行权限的变更
+    数字:基本权限9个字符,分别三个一组 owner/group/others 
+    权限字元:rwx,对应数字 r:4 w:2 x:1。每中身份三个权限分数需要累加，
+    例如[-rwxrwx---]:owner=rwx=4+2+1=7, group=rwx=4+2+1=7, other=---=0+0+0=0;权限数字是:770
+    变更权限: #chomd [-R] xyz dirname/filename (xyz权限数字，例如:770)
+字符:user(u)/group(g)/other(o)/all(a,全部身份)[-rwxr-xr-x] 
+    #chmod u=rwx,go=rx dirname/filename  // = 表示设定
+    #chmod o-r dirname/filename // o 除去 r 权限
+    #chmod o+r dirname/filename // o 增加 r 权限
+```
 
 
 
