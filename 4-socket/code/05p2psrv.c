@@ -1,5 +1,5 @@
 /*
-* 可处理多进程的回射服务器
+* 点对点服务器
 */
 
 #include <unistd.h>
@@ -20,25 +20,6 @@
 			exit(EXIT_FAILURE); 	\
 		} while(0) 
 
-void do_service(int conn)
-{
-	char recvbuf[1024];
-	while(1)
-	{
-		memset(recvbuf, 0, sizeof(recvbuf));
-		int ret = read(conn,recvbuf,sizeof(recvbuf));
-		if (ret == 0){
-			// 客户端关闭了,返回
-			printf("client_close\n");
-			break;
-		}else if (ret == -1){
-			ERR_EXIT("read");
-		}
-
-		fputs(recvbuf,stdout);
-		write(conn, recvbuf, ret);
-	}	
-}
 
 int main(void)
 {
@@ -73,30 +54,41 @@ int main(void)
 	socklen_t peerlen = sizeof(peeraddr);
 	int conn; // 已连接套接字，主动
 	pid_t pid;
-	while(1)
+	pid = fork(); // 创建一个子进程，父进程用来发送数据，子进程用来接收数据
+	if (pid == -1)
+		// 失败
+		ERR_EXIT("fork");
+	
+	if (pid == 0)
 	{
-		// listenfd 监听套接字
-		// 阻塞，监听三次握手，一旦客户端连接过来，会将地址填充到 peeraddr。如果 accept 的第三个参数没有初始化，会连接失败
-		if ((conn = accept(listenfd, (struct sockaddr*)&peeraddr, &peerlen)) < 0) 
-			ERR_EXIT("accept");
-
-		printf("ip=%s port=%d\n", inet_ntoa(peeraddr.sin_addr),ntohs(peeraddr.sin_port));
-
-		// 一旦连接成功，创建子进程，父进程进行阻塞监听
-		pid = fork();
-		if (pid == -1)
-			ERR_EXIT("fork");
-		if (pid == 0){
-			// 子进程不需要监听套接口
-			close(listenfd);
-			do_service(conn);
-			// do_service 返回，则销毁该子进程
-			exit(EXIT_SUCCESS);
-		}else{
-			// conn 已连接套接字
-			// 对于父进程来说，他不需要处理连接，关掉连接套接口
-			close(conn);
+		char sendbuf[1024] = {0};
+		while (fgets(sendbuf, sizeof(sendbuf), stdin) != NULL) 
+		{
+			write(conn, sendbuf, strlen(sendbuf));
+			memset(sendbuf, 0, sizeof(sendbuf));
 		}
+		printf("child close\n");
+		exit(EXIT_SUCCESS);
+
+	}else{
+		char recvbuf[1024];
+		while(1)
+		{
+			memset(recvbuf, 0, sizeof(recvbuf));
+			int ret = read(conn,recvbuf,sizeof(recvbuf));
+			if (ret == -1)
+				ERR_EXIT("read");
+			if (ret == 0)
+			{
+				// 客户端关闭了,返回
+				printf("peer_close\n");
+				break;
+			}
+
+			fputs(recvbuf,stdout);
+		}	
+		printf("parent close\n");
+		exit(EXIT_SUCCESS);
 	}	
 	
 	return 0;
