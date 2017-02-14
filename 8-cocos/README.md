@@ -49,7 +49,7 @@ int main(){
 
 #### Cocos2d-x 内存管理机制
 - 引用计数
-Cocos2d-x中的所有对象几乎都继承自Ref基类。Ref基类主要的职责就是对对象进行引用计数管理
+> Cocos2d-x中的所有对象几乎都继承自Ref基类。Ref基类主要的职责就是对对象进行引用计数管理
 ```c++
     class CC_DLL Ref
     {
@@ -63,14 +63,69 @@ Cocos2d-x中的所有对象几乎都继承自Ref基类。Ref基类主要的职�
         // count of references
         unsigned int _referenceCount;
         friend class AutoreleasePool;
-
     }
 ```
 
+> 当一个对象使用new运算符分配内存时，其引用计数为1，调用retain()方法会增加其引用计数，调用release() 方法则会减少其引用计数，release()会在其引用计数为0时自动调用delete()运算符删除对象并释放内存。
+> 
+> 很少单独使用retain()和release()方法管理内存，在设计时就明确它们应该在哪个地方被释放，大多数引用只是一种弱引用关系，使用retain()和release()反而会增加复杂性。
 
+```c++
+    auto node = new Node();   // 引用计数为1
+    addChild(node);           // 引用计数为2
+    ...
+    node->removeFromParent(); // 引用计数为1，
+    node->release();          // 引用计数为0，对象删除，如果忘了这一步则会导致内存泄露，所以不推荐这样的用法
+```
 
+- 用 autorelease()声明一个智能指针
 
+> Cocos2d-x 使用 autorelease() 来声明一个对象指针为智能指针，但是这些智能指针并不单独关联某个自动变量，而是全部被加入到一个AutoreleasePool中，在每一帧结束时对加入AutoreleasePool中的对象进行清理。也就是说，Cocos2d-x中，一个智能指针的生命周期从被创建时开始，到当前帧结束时结束。
 
+```c++
+    // 通过 autorelease() 将一个对象添加到一个 AutoreleasePool 中
+    Ref* Ref::autorelease()
+    {
+        PoolManager::getInstance()->getCurrentPool()->addObject(this);
+        return this;
+    }
+
+    // 每一帧结束时，清理当前 AutoreleasePool 中的对象
+    void DisplayLinkDirector::mainLoop()
+    {
+        ...
+        if (! _invalid) {
+            drawScene();
+
+            // release the objects
+            PoolManager::getInstance()->getCurrentPool()->clear();
+        }
+    }
+
+    void AutoreleasePool::clear()
+    {
+        for (const auto &obj : _managedObjectArray){
+            obj->release();
+        }
+        _managedObjectArray.clear();
+    }
+```
+
+> 实际的实现机制: AutoreleasePool 对池中的每个对象执行一次 release 操作，假设该对象的引用计数为 1，表示其从未被使用，则执行release操作后引用计数为0，对象将被释放
+
+```c++
+    // 创建一个不被使用的Node
+    auto node = new Node();   // 引用计数为1
+    node->autorelease();      // 加入智能指针池
+    // 在该帧结束时，Node对象将自动释放。
+
+    // 如果该对象在该帧结束之前被使用,如
+    auto node = new Node();   // 引用计数为1
+    node->autorelease();      // 加入智能指针池
+    addChild(node);           // 引用计数为2
+    // 在该帧结束时，AutoreleasePool 对其执行 1 次 release 操作后，引用计数为1，该对象继续存在。当下次该对象Node被移除时，引用计数为0，对象就会被自动释放。
+    // 这样就实现了 Ref 对象的自定内存管理。
+``` 
 
 
 
