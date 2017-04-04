@@ -14,7 +14,7 @@
 OpenGL ES 渲染流程及渲染管线，阴影部分为可编程阶段
 
 ```
-图片模型-[转化乘]->一组图元 
+图片模型-[转化成]->一组图元 
 每个图元-[由..组成]->一个或多个顶点
 每个顶点:
     定义一个点、一条边的一端或者三角形的一个角,
@@ -163,12 +163,13 @@ GLSL 有一些内建的变量，这些特殊的变量是可编程管道的一部
 #### 输入输出
 
 > 1) Uniforms <br />
+> 由应用程序提供，全局只读 <br />
 > 是一种外界和着色器交流的方式。<br />
 > 为在一个渲染循环里不变的输入值设计的。 <br />
 > Uniform 在顶点着色器和片段着色器都可以被访问到。<br />
 
 > 2) Attributes <br />
-> 仅可以在顶点着色器被访问。<br />
+> 由应用程序提供，只读，仅可以在顶点着色器被访问。<br />
 > Attribute 是在随着每一个顶点不同而会发生变动的输入值。<br />
 > 顶点着色器利用这些变量来计算位置，以它们为基础计算一些值，然后这些值以 varyings 的方式传到片段着色器。<br />
 
@@ -211,7 +212,112 @@ clamp():
 
 > 如果想颜色分量或纹理坐标在 0.0和1.0之间，使用 clamp() 检查并确保值在 0.0 和 1.0 之间，如果给定的值小于0.0，则 clamp()会把值设为0.0。防止出错
 
+# Cocos2d-x OpenGL ES API
 
+```c++
+Scene* HelloWorld::createScene()
+{
+    auto scene = Scene::create();
+    auto layer = HelloWorld::create(); 
+    scene->addChild(layer);   
+    return scene;
+}
+
+void HelloWorld::visit(Renderer *renderer, const Mat4 &transform,uint32_t parentFlags)
+{
+    Layer::visit(renderer, transform, parentFlags);
+    _command.init(_globalZOrder);
+    _command.func = CC_CALLBACK_0(HelloWorld::onDraw, this);
+    Director::getInstance()->getRenderer()->addCommand(&_command);
+}
+
+void HelloWorld::onDraw()
+{
+    //使用已经在init中初始化的glProgram
+    glProgram->use();
+    glProgram->setUniformsForBuiltins();
+    
+    //获取VAO（OSX和ISO中默认开启，windows中默认不开启）
+    glBindVertexArray(vao);
+    
+    //获取VBO
+    glBindBuffer(GL_ARRAY_BUFFER, positionVBO);
+    //填充坐标数据
+    glBufferData(GL_ARRAY_BUFFER, sizeof(_position), _position, GL_STATIC_DRAW);
+    /**
+        每个属性在 顶点着色器里有一个 location，它是用来传递数据的入口
+        glGetAttribLocation是用来获得 顶点着色器的attribute修饰的变量的入口，
+        在传递数据之前，要告诉OpenGL,所以要调用 glEnableVertexAttribArray。
+        然后数据通过 glVertexAttribPointer 传给 GLSL，第一个参数就是该函数的返回值
+
+        Uniform：glGetUniformLocation
+    */
+    positionLocation = glGetAttribLocation(glProgram->getProgram(), "a_position");
+    glEnableVertexAttribArray(positionLocation);
+    glVertexAttribPointer(positionLocation, 2, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
+    
+    //获取VBO
+    glBindBuffer(GL_ARRAY_BUFFER, colorVBO);
+    //填充颜色数据
+    glBufferData(GL_ARRAY_BUFFER, sizeof(_color), _color, GL_STATIC_DRAW);
+    colorLocation = glGetAttribLocation(glProgram->getProgram(), "a_color");
+    glEnableVertexAttribArray(colorLocation);
+    glVertexAttribPointer(colorLocation, 4, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
+    
+    //使用VAO
+    glBindVertexArray(vao);
+    //渲染
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    //清空VAO
+    glBindVertexArray(0);
+    
+    CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1, 3);
+    CHECK_GL_ERROR_DEBUG();
+}
+
+bool HelloWorld::init()
+{
+    if ( !Layer::init() )
+    {
+        return false;
+    }
+    
+    //准备数据
+    auto size = Director::getInstance()->getWinSize();
+    float position[] = { 0, 0, size.width, 0, size.width / 2, size.height};
+    float color[] = { 0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1};
+    for (int i = 0; i < sizeof(position); i++) {
+        _position[i] = position[i];
+    }
+    for (int i = 0; i < sizeof(color); i++) {
+        _color[i] = color[i];
+    }
+    
+    /**
+        新建 GLProgram,通过 顶点着色器 xxx.vert 和 片段着色器 xxx.frag 初始化
+        initWithFilenames("myVertextShader.vert", "myFragmentShader.frag")
+
+        如果不是新建，可以通过 getGLProgram() 获得当前的 glProgram,然后 glProgram->use() 使用
+    */
+    glProgram = new GLProgram;
+    glProgram->initWithFilenames("vertextShader.vert","fragmentShader.frag");
+    glProgram->link();
+    glProgram->updateUniforms();
+    this->setGLProgram(glProgram);
+    
+    //glGen的系列方法会不断的Malloc内存空间，写在onDraw中会导致内存泄漏
+    /**
+        glGenxxx 生成 VBO、VAO
+        glBindxxx 绑定 VBO、VAO
+    */
+    glGenVertexArrays(1, &vao);
+    glGenBuffers(1, &positionVBO);
+    glGenBuffers(1, &colorVBO);
+    return true;
+}
+
+
+```
 
 
 
