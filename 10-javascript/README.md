@@ -40,7 +40,8 @@ Booleand() 函数 转换(if语句自动执行 Boolean())
 - Object 类型
 
 > Object 的每个实例都具有的属性和方法: <br />
-> constru
+
+
 
 
 
