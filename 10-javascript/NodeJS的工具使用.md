@@ -70,7 +70,7 @@ $ npm install cnpm -g --registry=https://registry.npm.taobao.org
 
 Express
 
-> Express 是基于 Node.js 平台的 web 开发框架
+> Express 是基于 Node.js 平台的 web 开发框架(代码库)
 > 例如现在工作目录是 project
 
 ```
@@ -80,6 +80,9 @@ $cnpm install express
 ```
 
 > 在项目下产生一个 新的目录, node_modules 是 express 的存放路径
+
+> package.json 位于模块的目录下，用于定义包的属性
+> Express 包的package.json 文件位于 node_modules/express/package.json
 
 Nodemon
 
@@ -114,5 +117,63 @@ Chrome 开发人员工具
 
 > Network: 浏览器和服务器的各种通讯，其中包括静态资源或者向服务器发起的请求，重点关注 XHR
 > Sources: 查看资源文件， comman+p 则是快速搜索
+
+REPL(交互式解释器)
+
+> Node.js REPL 在终端中输入命令，并接收系统的响应
+
+```
+$node
+>
+
+// REPL命令
+command + c 退出当前终端 (两次command + c退出 Node REPL)
+command + d 退出 Node REPL
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 END
