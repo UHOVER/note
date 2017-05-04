@@ -84,6 +84,24 @@ $cnpm install express
 > package.json 位于模块的目录下，用于定义包的属性
 > Express 包的package.json 文件位于 node_modules/express/package.json
 
+```
+// 如果一个目录下存在 index.js,例如：test/index.js
+$node test // 可通 node 目录，node 去找 index.js 去执行
+
+// 如果目录下没有 index.js, 但有 package.json(描述包内信息)
+{
+    "name" : "test", // 包名
+    "main" : "./app.js", // 用来表示执行当前包时，默认执行的文件，当前为 ./app.js
+    /**
+        dependencies 引入的第三方资源库,然后通过shell 切换到项目目录下,通过
+        $npm install。去检查 dependencies 的依赖关系，并下载对应的第三方库
+    */
+    "dependencies": {   
+        "express" : "*",    // 库名 : 版本号(*表示最新版本)
+    }
+}
+```
+
 Nodemon
 
 > 用来监控 Node.js 源代码的任何变化和自动重启服务器。
